@@ -17,11 +17,15 @@ class TopCard extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Container(
         height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Color(0xFF2F7E79),
+        ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(
+              const Text(
                 'B A L A N C E',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
@@ -103,10 +107,6 @@ class TopCard extends StatelessWidget {
               )
             ],
           ),
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Color(0xFF2F7E79),
         ),
       ),
     );

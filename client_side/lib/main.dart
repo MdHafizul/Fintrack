@@ -1,10 +1,7 @@
 import 'package:expensetracker/pages/splashscreen/splashscreen.dart';
 import 'package:flutter/material.dart';
-import 'service/local_storage_api.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await LocalStorageApi().init();
+void main() {
   runApp(MyApp());
 }
 

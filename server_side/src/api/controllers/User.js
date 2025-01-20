@@ -9,6 +9,7 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 const registerUser = async (req, res) => {
     const { username, password, email, phoneNumber } = req.body;
 

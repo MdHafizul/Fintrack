@@ -13,6 +13,12 @@ class MyTransaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Debugging: Print the category of each transaction
+    print('Transaction: $transactionName, Category: $expenseOrIncome');
+
+    // Ensure the category is correctly checked
+    final isExpense = expenseOrIncome.toLowerCase() == 'expense';
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Container(
@@ -48,9 +54,7 @@ class MyTransaction extends StatelessWidget {
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: expenseOrIncome == 'expense'
-                        ? Colors.red
-                        : Colors.green,
+                    color: isExpense ? Colors.red : Colors.green,
                   ),
                   child: Icon(
                     Icons.attach_money,
@@ -70,11 +74,11 @@ class MyTransaction extends StatelessWidget {
               ],
             ),
             Text(
-              (expenseOrIncome == 'expense' ? '-' : '+') + '\$' + money,
+              (isExpense ? '-' : '+') + '\$' + money,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: expenseOrIncome == 'expense' ? Colors.red : Colors.green,
+                color: isExpense ? Colors.red : Colors.green,
               ),
             ),
           ],

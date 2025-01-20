@@ -17,15 +17,36 @@ class _HomepagetestState extends State<Homepagetest> {
   final _textcontrollerITEM = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isIncome = false;
-  int _selectedIndex = 0; // Track the selected page
+  int _selectedIndex = 0;
+  List<dynamic> _transactions = [];
+  double _income = 0.0;
+  double _expense = 0.0;
 
-  void _enterTransaction() {
-    LocalStorageApi.insert(
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    final transactions = await LocalStorageApi.getTransactions();
+    final income = await LocalStorageApi.calculateIncome();
+    final expense = await LocalStorageApi.calculateExpense();
+
+    setState(() {
+      _transactions = transactions;
+      _income = income;
+      _expense = expense;
+    });
+  }
+
+  void _enterTransaction() async {
+    await LocalStorageApi.insert(
       _textcontrollerITEM.text,
       _textcontrollerAMOUNT.text,
       _isIncome,
     );
-    setState(() {});
+    _fetchData();
   }
 
   void _newTransaction() {
@@ -123,7 +144,7 @@ class _HomepagetestState extends State<Homepagetest> {
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[600],
+                            backgroundColor: Colors.green,
                           ),
                           child: Text(
                             'Enter',
@@ -153,27 +174,11 @@ class _HomepagetestState extends State<Homepagetest> {
     setState(() {
       _selectedIndex = index;
     });
-
-    // Navigate to different pages based on the selected index
-    switch (index) {
-      case 0:
-        // Home page (this page)
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const Homepagetest()));
-        break;
-      case 1:
-        // Navigate to Chat page
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => Chatpage()));
-        break;
-      // case 2:
-      //   // Navigate to Statistics page
-      //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => StatisticsPage()));
-      //   break;
-      // case 3:
-      //   // Navigate to Settings page
-      //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => SettingsPage()));
-      //   break;
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Chatpage()),
+      );
     }
   }
 
@@ -195,7 +200,6 @@ class _HomepagetestState extends State<Homepagetest> {
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 34,
-                        fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -223,8 +227,7 @@ class _HomepagetestState extends State<Homepagetest> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: PlusButton(
-          function: _newTransaction), 
+      floatingActionButton: PlusButton(function: _newTransaction),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         color: Colors.white,
@@ -261,12 +264,6 @@ class _HomepagetestState extends State<Homepagetest> {
                   },
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.notifications_active),
-                  color: Colors.white,
-                  iconSize: 28,
-                )
               ],
             ),
           ),
@@ -278,11 +275,9 @@ class _HomepagetestState extends State<Homepagetest> {
                 Padding(
                   padding: const EdgeInsets.only(top: 50.0),
                   child: TopCard(
-                    balance: (LocalStorageApi.calculateIncome() -
-                            LocalStorageApi.calculateExpense())
-                        .toString(),
-                    income: LocalStorageApi.calculateIncome().toString(),
-                    expense: LocalStorageApi.calculateExpense().toString(),
+                    balance: (_income - _expense).toString(),
+                    income: _income.toString(),
+                    expense: _expense.toString(),
                   ),
                 ),
                 Expanded(
@@ -292,14 +287,13 @@ class _HomepagetestState extends State<Homepagetest> {
                         const SizedBox(height: 20),
                         Expanded(
                           child: ListView.builder(
-                            itemCount: LocalStorageApi.getTransactions().length,
+                            itemCount: _transactions.length,
                             itemBuilder: (context, index) {
-                              var transaction =
-                                  LocalStorageApi.getTransactions()[index];
+                              var transaction = _transactions[index];
                               return MyTransaction(
-                                transactionName: transaction[0],
-                                money: transaction[1],
-                                expenseOrIncome: transaction[2],
+                                transactionName: transaction['description'],
+                                money: transaction['amount'].toString(),
+                                expenseOrIncome: transaction['category'],
                               );
                             },
                           ),
@@ -322,7 +316,7 @@ class _HomepagetestState extends State<Homepagetest> {
       onPressed: () => _onItemTapped(index),
       icon: Icon(icon),
       color: isSelected ? const Color(0xFF429690) : Colors.grey,
-      iconSize: isSelected ? 36 : 28, // Enlarge the selected icon
+      iconSize: isSelected ? 36 : 28,
     );
   }
 }
