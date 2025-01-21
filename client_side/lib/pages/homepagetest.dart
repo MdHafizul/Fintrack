@@ -1,5 +1,6 @@
 import 'package:expensetracker/pages/chatpage.dart';
-import 'package:expensetracker/service/local_storage_api.dart';
+import 'package:expensetracker/service/database.dart';
+import 'package:expensetracker/pages/statisticpage.dart';
 import 'package:expensetracker/widget/plus_button.dart';
 import 'package:expensetracker/widget/top_card.dart';
 import 'package:expensetracker/widget/transactions.dart';
@@ -170,15 +171,31 @@ class _HomepagetestState extends State<Homepagetest> {
     );
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  void _onItemTapped(int index) async {
     if (index == 1) {
-      Navigator.push(
+      final result = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Chatpage()),
       );
+      if (result != null) {
+        setState(() {
+          _selectedIndex = result;
+        });
+      }
+    } else if (index == 2) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => StatisticPage()),
+      );
+      if (result != null) {
+        setState(() {
+          _selectedIndex = result;
+        });
+      }
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
     }
   }
 

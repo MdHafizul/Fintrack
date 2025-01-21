@@ -7,9 +7,11 @@ environment:
   sdk: ^3.5.1
 
 dependencies:
+  fl_chart: ^0.70.2
   flutter:
     sdk: flutter
   http: ^1.2.2
+  intl: ^0.20.1
   shared_preferences: ^2.3.2
   smooth_page_indicator: ^1.2.0+3
 
