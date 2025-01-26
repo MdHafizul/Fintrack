@@ -1,7 +1,9 @@
+import 'package:expensetracker/pages/settingsPage.dart';
 import 'package:expensetracker/pages/statisticpage.dart';
 import 'package:expensetracker/pages/homepagetest.dart';
 import 'package:flutter/material.dart';
 import 'package:expensetracker/service/database.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -19,6 +21,7 @@ class _ChatpageState extends State<Chatpage> {
   List<dynamic> _transactions = [];
   double _income = 0.0;
   double _expense = 0.0;
+  String apiKey = dotenv.env['API_KEY'] ?? 'default_value';
 
   @override
   void initState() {
@@ -114,9 +117,6 @@ class _ChatpageState extends State<Chatpage> {
         }),
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         // Parse the response correctly based on the actual structure
@@ -162,7 +162,18 @@ class _ChatpageState extends State<Chatpage> {
           _selectedIndex = result;
         });
       }
-    } else {
+    } else if (index == 3) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SettingsPage()),
+      );
+      if (result != null) {
+        setState(() {
+          _selectedIndex = result;
+        });
+      }
+    }
+    {
       setState(() {
         _selectedIndex = index;
       });

@@ -1,4 +1,13 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+
+// Generate JWT token
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '30d',
+    });
+};
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -10,6 +19,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// Register a new user
 const registerUser = async (req, res) => {
     const { username, password, email, phoneNumber } = req.body;
 
@@ -22,31 +32,66 @@ const registerUser = async (req, res) => {
         // Create and save the new user
         const user = new User({ username, password, email, phoneNumber });
         await user.save();
-        console.log('User saved:', user);
         res.json({ success: true, message: "User registered successfully.", data: null });
     } catch (error) {
-        // Handle any errors (e.g., duplicate email/username/phoneNumber)
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-
 // Login
 const loginUser = async (req, res) => {
-    const { username, password , } = req.body;
+    const { username, password } = req.body;
 
     try {
         const user = await User.findOne({ username });
 
-        if (!user || user.password !== password) {
-            return res.status(401).json({ success: false, message: "Invalid name or password." });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ success: false, message: "Invalid username or password." });
         }
 
-        res.status(200).json({ success: true, message: "Login successful.", data: user });
+        res.json({
+            success: true,
+            message: "Login successful.",
+            data: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+            },
+            token: generateToken(user._id),
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// Reset password
+const resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        return res.status(400).json({ success: false, message: "Email and new password are required." });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ success: true, message: "Password reset successfully." });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
 
 // Get a user by ID
 const getUserById = async (req, res) => {
@@ -68,7 +113,7 @@ const updateUser = async (req, res) => {
         const userID = req.params.id;
         const { username, password } = req.body;
         if (!username || !password) {
-            return res.status(400).json({ success: false, message: "Name and password are required." });
+            return res.status(400).json({ success: false, message: "Username and password are required." });
         }
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -104,6 +149,7 @@ const deleteUser = async (req, res) => {
 module.exports = {
     getAllUsers,
     loginUser,
+    resetPassword,
     getUserById,
     registerUser,
     updateUser,

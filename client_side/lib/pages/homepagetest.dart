@@ -1,10 +1,13 @@
 import 'package:expensetracker/pages/chatpage.dart';
 import 'package:expensetracker/service/database.dart';
 import 'package:expensetracker/pages/statisticpage.dart';
+import 'package:expensetracker/pages/settingsPage.dart';
 import 'package:expensetracker/widget/plus_button.dart';
 import 'package:expensetracker/widget/top_card.dart';
 import 'package:expensetracker/widget/transactions.dart';
 import 'package:flutter/material.dart';
+import 'package:expensetracker/service/authService.dart';
+import 'package:expensetracker/pages/authentication/loginPage.dart';
 
 class Homepagetest extends StatefulWidget {
   const Homepagetest({super.key});
@@ -171,6 +174,80 @@ class _HomepagetestState extends State<Homepagetest> {
     );
   }
 
+  void _updateTransaction(
+      String id, String item, String amount, bool isIncome) async {
+    await LocalStorageApi.updateTransaction(id, item, amount, isIncome);
+    _fetchData();
+  }
+
+  void _deleteTransaction(String id, bool isIncome) async {
+    await LocalStorageApi.deleteTransaction(id, isIncome);
+    _fetchData();
+  }
+
+  void _showUpdateDialog(String id, String item, String amount, bool isIncome) {
+    _textcontrollerITEM.text = item;
+    _textcontrollerAMOUNT.text = amount;
+    _isIncome = isIncome;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Update Transaction'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Description'),
+                  controller: _textcontrollerITEM,
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Amount'),
+                  controller: _textcontrollerAMOUNT,
+                  keyboardType: TextInputType.number,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text('Expense'),
+                    Switch(
+                      value: _isIncome,
+                      onChanged: (newValue) {
+                        setState(() {
+                          _isIncome = newValue;
+                        });
+                      },
+                    ),
+                    Text('Income'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _updateTransaction(id, _textcontrollerITEM.text,
+                      _textcontrollerAMOUNT.text, _isIncome);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _onItemTapped(int index) async {
     if (index == 1) {
       final result = await Navigator.push(
@@ -192,11 +269,29 @@ class _HomepagetestState extends State<Homepagetest> {
           _selectedIndex = result;
         });
       }
+    } else if (index == 3) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SettingsPage()),
+      );
+      if (result != null) {
+        setState(() {
+          _selectedIndex = result;
+        });
+      }
     } else {
       setState(() {
         _selectedIndex = index;
       });
     }
+  }
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   @override
@@ -238,6 +333,13 @@ class _HomepagetestState extends State<Homepagetest> {
                 onTap: () {
                   Navigator.of(context).pop();
                 },
+              ),
+              ListTile(
+                iconColor: Colors.white,
+                leading: const Icon(Icons.logout),
+                title:
+                    const Text('Logout', style: TextStyle(color: Colors.white)),
+                onTap: _logout,
               ),
             ],
           ),
@@ -308,9 +410,17 @@ class _HomepagetestState extends State<Homepagetest> {
                             itemBuilder: (context, index) {
                               var transaction = _transactions[index];
                               return MyTransaction(
+                                id: transaction['_id'],
                                 transactionName: transaction['description'],
                                 money: transaction['amount'].toString(),
                                 expenseOrIncome: transaction['category'],
+                                onDelete: (id) => _deleteTransaction(
+                                    id, transaction['category'] == 'income'),
+                                onUpdate: (id) => _showUpdateDialog(
+                                    id,
+                                    transaction['description'],
+                                    transaction['amount'].toString(),
+                                    transaction['category'] == 'income'),
                               );
                             },
                           ),

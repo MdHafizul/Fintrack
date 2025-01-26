@@ -3,17 +3,17 @@ const asyncHandler = require("../middlewares/async");
 
 // @desc      Get all income
 // @route     GET /api/income
-// @access    Public
+// @access    Private
 const getAllIncome = asyncHandler(async (req, res, next) => {
-  const income = await Income.find();
+  const income = await Income.find({ user: req.user._id });
   res.json({ success: true, message: "Income retrieved successfully.", data: income });
 });
 
 // @desc      Get single income by ID
 // @route     GET /api/income/:id
-// @access    Public
+// @access    Private
 const getIncomeById = asyncHandler(async (req, res, next) => {
-  const income = await Income.findById(req.params.id);
+  const income = await Income.findOne({ _id: req.params.id, user: req.user._id });
 
   if (!income) {
     return res.status(404).json({ success: false, message: "Income not found." });
@@ -24,12 +24,12 @@ const getIncomeById = asyncHandler(async (req, res, next) => {
 
 // @desc      Create new income
 // @route     POST /api/income
-// @access    Public
+// @access    Private
 const createIncome = asyncHandler(async (req, res, next) => {
-  const { user, amount, description, category } = req.body;
+  const { amount, description, category } = req.body;
 
   const income = new Income({
-    user,
+    user: req.user._id,
     amount,
     description,
     category,
@@ -41,9 +41,9 @@ const createIncome = asyncHandler(async (req, res, next) => {
 
 // @desc      Update income
 // @route     PUT /api/income/:id
-// @access    Public
+// @access    Private
 const updateIncome = asyncHandler(async (req, res, next) => {
-  const income = await Income.findById(req.params.id);
+  const income = await Income.findOne({ _id: req.params.id, user: req.user._id });
 
   if (!income) {
     return res.status(404).json({ success: false, message: "Income not found." });
@@ -60,9 +60,9 @@ const updateIncome = asyncHandler(async (req, res, next) => {
 
 // @desc      Delete income
 // @route     DELETE /api/income/:id
-// @access    Public
+// @access    Private
 const deleteIncome = asyncHandler(async (req, res, next) => {
-  const income = await Income.findById(req.params.id);
+  const income = await Income.findOne({ _id: req.params.id, user: req.user._id });
 
   if (!income) {
     return res.status(404).json({ success: false, message: "Income not found." });

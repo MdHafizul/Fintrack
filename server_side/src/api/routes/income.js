@@ -1,6 +1,6 @@
-// routes/incomeRoutes.js
 const express = require("express");
 const router = express.Router();
+const { protect } = require('../middlewares/authMiddleware');
 const {
   getAllIncome,
   getIncomeById,
@@ -10,12 +10,12 @@ const {
 } = require("../controllers/Income");
 
 router.route("/")
-  .get(getAllIncome)           // Get all income
-  .post(createIncome);         // Create new income
+  .get(protect, getAllIncome)           // Get all income
+  .post(protect, createIncome);         // Create new income
 
 router.route("/:id")
-  .get(getIncomeById)          // Get single income by ID
-  .put(updateIncome)           // Update income by ID
-  .delete(deleteIncome);       // Delete income by ID
+  .get(protect, getIncomeById)          // Get single income by ID
+  .put(protect, updateIncome)           // Update income by ID
+  .delete(protect, deleteIncome);       // Delete income by ID
 
 module.exports = router;

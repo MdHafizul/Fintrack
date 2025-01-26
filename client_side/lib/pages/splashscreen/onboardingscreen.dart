@@ -1,4 +1,5 @@
 import 'package:expensetracker/pages/authentication/loginpage.dart';
+import 'package:expensetracker/pages/authentication/signuppage.dart';
 import 'package:expensetracker/pages/homepagetest.dart';
 import 'package:flutter/material.dart';
 
@@ -79,7 +80,7 @@ class OnboardingScreen extends StatelessWidget {
             // Navigate to the next screen
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => Homepagetest(),
+                builder: (context) => Signuppage(),
               ),
             );
           },

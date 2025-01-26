@@ -1,8 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:expensetracker/pages/authentication/loginpage.dart';
+import 'package:expensetracker/service/authService.dart';
 
-class Signuppage extends StatelessWidget {
+class Signuppage extends StatefulWidget {
   const Signuppage({super.key});
+
+  @override
+  _SignuppageState createState() => _SignuppageState();
+}
+
+class _SignuppageState extends State<Signuppage> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  Future<void> _signup() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        print('Signup button pressed');
+        print('Username: ${_usernameController.text}');
+        print('Password: ${_passwordController.text}');
+        print('Email: ${_emailController.text}');
+        print('Phone Number: ${_phoneNumberController.text}');
+
+        final response = await AuthService.signup(
+          _usernameController.text,
+          _passwordController.text,
+          _emailController.text,
+          _phoneNumberController.text,
+        );
+
+        print('Signup successful: $response');
+
+        _showSuccessDialog();
+
+      } catch (e) {
+        print('Signup failed: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to signup: $e')),
+        );
+      }
+    } else {
+      print('Form validation failed');
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Success',
+            style: TextStyle(
+              color: Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text('You have successfully registered!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +98,12 @@ class Signuppage extends StatelessWidget {
     );
   }
 
-  // Widget for the background image
   Widget _buildBackgroundImage() {
     return Image.asset(
       'assets/images/loginpagebg.png',
     );
   }
 
-  // Widget for the signup form with shadow effect
   Widget _buildSignupForm(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
@@ -44,48 +123,55 @@ class Signuppage extends StatelessWidget {
               ],
             ),
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  "Create Account",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Create Account",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                _buildTextField(
-                  labelText: 'Username',
-                  icon: Icons.person,
-                  keyboardType: TextInputType.name,
-                ),
-                const SizedBox(height: 20),
-                _buildTextField(
-                  labelText: 'Password',
-                  icon: Icons.lock,
-                  obscureText: true,
-                ),
-                const SizedBox(height: 20),
-                _buildTextField(
-                  labelText: 'Email',
-                  icon: Icons.email,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 20),
-                _buildTextField(
-                  labelText: 'Phone Number',
-                  icon: Icons.phone,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 20),
-                _buildSignupButton(),
-                const SizedBox(height: 10),
-                _buildLoginText(context),
-              ],
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _usernameController,
+                    labelText: 'Username',
+                    icon: Icons.person,
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _passwordController,
+                    labelText: 'Password',
+                    icon: Icons.lock,
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _emailController,
+                    labelText: 'Email',
+                    icon: Icons.email,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _phoneNumberController,
+                    labelText: 'Phone Number',
+                    icon: Icons.phone,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSignupButton(),
+                  const SizedBox(height: 10),
+                  _buildLoginText(context),
+                ],
+              ),
             ),
           ),
         ),
@@ -93,8 +179,8 @@ class Signuppage extends StatelessWidget {
     );
   }
 
-  // Widget for the text fields with shadow effect
   Widget _buildTextField({
+    required TextEditingController controller,
     required String labelText,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
@@ -104,7 +190,8 @@ class Signuppage extends StatelessWidget {
       elevation: 5,
       shadowColor: Colors.black.withOpacity(0.2),
       borderRadius: BorderRadius.circular(10),
-      child: TextField(
+      child: TextFormField(
+        controller: controller,
         decoration: InputDecoration(
           labelText: labelText,
           enabledBorder: OutlineInputBorder(
@@ -124,15 +211,21 @@ class Signuppage extends StatelessWidget {
         ),
         keyboardType: keyboardType,
         obscureText: obscureText,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $labelText';
+          }
+          return null;
+        },
       ),
     );
   }
 
-  // Widget for the signup button
   Widget _buildSignupButton() {
     return ElevatedButton(
       onPressed: () {
-        // Add your signup logic here
+        print('Signup button pressed');
+        _signup();
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF438883),
@@ -151,7 +244,6 @@ class Signuppage extends StatelessWidget {
     );
   }
 
-  // Widget for the login text
   Widget _buildLoginText(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +258,6 @@ class Signuppage extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
-            // Navigate to the login page
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const LoginPage()),

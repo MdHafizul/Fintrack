@@ -7,21 +7,24 @@ const errorHandler = require('./src/api/middlewares/error');
 dotenv.config({ path: '.env' });
 
 const app = express();
-app.use(express.json()); 
+app.use(express.json());
 
 // Get port and MongoDB URL from environment variables
 const port = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 
-// Import user and income routes
+// Import user, income, and expense routes
 const userRoutes = require('./src/api/routes/user');
 const incomeRoutes = require('./src/api/routes/income');
 const expenseRoutes = require('./src/api/routes/expense');
 
-// Mount the user and income routes
+// Mount the user, income, and expense routes
 app.use('/api/users', userRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
+
+// Error handler middleware
+app.use(errorHandler);
 
 // Function to connect to MongoDB and start the server
 const startServer = async () => {
@@ -40,6 +43,3 @@ const startServer = async () => {
 
 // Start the server
 startServer();
-
-// Error handler middleware
-app.use(errorHandler);
