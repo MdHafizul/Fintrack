@@ -3,7 +3,7 @@ import 'package:expensetracker/service/authService.dart';
 import 'package:http/http.dart' as http;
 
 class LocalStorageApi {
-  static const String baseUrl = 'http://192.168.9.88:5000/api';
+  static const String baseUrl = 'http://192.168.9.109:5000/api';
 
   // Fetch user data
   static Future<Map<String, dynamic>> getUserData(String userId) async {
